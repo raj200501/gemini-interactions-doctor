@@ -1,0 +1,14 @@
+{
+  "tool": "refund_customer",
+  "mode": "propose_then_execute",
+  "approval_required": true,
+  "approval_fields": [
+    "run_id",
+    "customer_id",
+    "amount",
+    "reason",
+    "approved_by",
+    "approved_at"
+  ],
+  "execution_rule": "Do not execute the side effect unless approved_by and approved_at are present."
+}
