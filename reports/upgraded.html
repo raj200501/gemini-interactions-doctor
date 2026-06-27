@@ -195,6 +195,12 @@
           <p class="metric-value">0</p>
         </div>
       </div>
+      <div class="panel">
+        <h2>Top Migration Blockers</h2>
+        
+        <p>No blocker findings.</p>
+        
+      </div>
     </div>
   </header>
   <main class="wrap">
@@ -202,7 +208,15 @@
       <h2>Summary</h2>
       <div class="panel">
         <p><strong>Target:</strong> <code>/Users/rajkashikar/Documents/Codex/2026-06-26/you-are-codex-working-inside-a/gemini-interactions-doctor/examples/upgraded-gemini-app</code></p>
-        <p><strong>Scan time:</strong> <code>2026-06-27T04:03:07+00:00</code></p>
+        <p><strong>Scan time:</strong> <code>2026-06-27T04:32:29+00:00</code></p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Readiness Scoring</h2>
+      <div class="panel">
+        <p>Score starts at <code>100</code>. Blockers subtract <code>20</code>, warnings subtract <code>8</code>, and notes subtract <code>3</code>.</p>
+        <p><code>NOT_READY</code> means a blocker exists or score is below <code>70</code>. <code>READY_WITH_CAUTION</code> means no blockers and score from <code>70-89</code>. <code>READY</code> means no blockers and score is <code>90+</code>.</p>
       </div>
     </section>
 
@@ -223,7 +237,7 @@
     </section>
 
     <section>
-      <h2>Evidence</h2>
+      <h2>Evidence Snippets</h2>
       <div class="issue-list">
         
         <div class="panel">No blocker or note evidence.</div>
@@ -241,6 +255,29 @@
       <div class="panel">
         <h2>Generated Files</h2>
         <p>Run <code>gdoctor patch /Users/rajkashikar/Documents/Codex/2026-06-26/you-are-codex-working-inside-a/gemini-interactions-doctor/examples/upgraded-gemini-app --out patches/upgraded-gemini-app</code> to write safe starter files.</p>
+        <ul>
+          
+          <li><code>.env.example</code></li>
+          
+          <li><code>AGENTS.md</code></li>
+          
+          <li><code>tests/test_ai_smoke.py</code></li>
+          
+          <li><code>observability/interaction_event_schema.json</code></li>
+          
+          <li><code>observability/trace_schema.json</code></li>
+          
+          <li><code>evals/sample_interaction_regression.jsonl</code></li>
+          
+          <li><code>prompts/structured_output_prompt.md</code></li>
+          
+          <li><code>prompts/external_content_boundary.md</code></li>
+          
+          <li><code>tools/approval_boundary_example.json</code></li>
+          
+          <li><code>MIGRATION_PLAN.md</code></li>
+          
+        </ul>
       </div>
     </section>
 
@@ -258,14 +295,43 @@
         </ul>
       </div>
       <div class="panel">
+        <h2>Recommended Migration Order</h2>
+        <ol>
+          
+          <li>Move from brittle string prompts to structured messages/events.</li>
+          
+          <li>Make tool calls and tool results first-class objects.</li>
+          
+          <li>Add machine-readable approval boundaries for side-effecting tools.</li>
+          
+          <li>Add structured output validation.</li>
+          
+          <li>Add trace events and run IDs.</li>
+          
+          <li>Add one replayable smoke/regression test.</li>
+          
+          <li>Tighten grounding/evidence claims.</li>
+          
+        </ol>
+      </div>
+    </section>
+
+    <section>
+      <div class="panel">
         <h2>What This Does Not Guarantee</h2>
         <ul>
+          
+          <li>It is not official Google tooling and is not affiliated with Google.</li>
+          
+          <li>It does not know private AI Studio or Gemini roadmap details.</li>
           
           <li>It does not prove production readiness.</li>
           
           <li>It does not execute or call Gemini APIs.</li>
           
           <li>It does not verify security, privacy, legal, or compliance posture.</li>
+          
+          <li>It uses static heuristics and safe patch templates.</li>
           
           <li>It does not guarantee that suggested patches are sufficient for your app architecture.</li>
           

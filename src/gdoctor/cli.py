@@ -4,10 +4,12 @@ from pathlib import Path
 
 import typer
 from rich.console import Console
+from rich.table import Table
 
 from gdoctor.doctor import print_summary, run_demo, run_doctor
 from gdoctor.patches import write_patch_files
 from gdoctor.reports import render_html, render_markdown, render_plan
+from gdoctor.rules import RULE_CATALOG
 from gdoctor.scanner import scan_project
 
 app = typer.Typer(
@@ -86,6 +88,26 @@ def patch(
 def demo() -> None:
     """Run the offline 60-second demo."""
     run_demo(console)
+
+
+@app.command()
+def rules() -> None:
+    """List all Gemini interaction-readiness rules."""
+    table = Table(title="Gemini Interactions Doctor Rules")
+    table.add_column("ID", no_wrap=True)
+    table.add_column("Title")
+    table.add_column("Severity", no_wrap=True)
+    table.add_column("Category", no_wrap=True)
+    table.add_column("Purpose")
+    for rule in RULE_CATALOG:
+        table.add_row(
+            rule["rule_id"],
+            rule["title"],
+            rule["severity"],
+            rule["category"],
+            rule["purpose"],
+        )
+    console.print(table)
 
 
 @app.command()

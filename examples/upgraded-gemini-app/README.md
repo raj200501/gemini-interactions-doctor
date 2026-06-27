@@ -2,10 +2,15 @@
 
 This sample demonstrates a safer local harness for a Gemini workflow:
 
-- structured message events
+- structured interaction events
+- message/event list with run IDs
+- tool call objects
+- tool result objects
 - scoped data lookup
-- refund proposal separated from execution
+- machine-readable approval boundary for refund
+- evidence/sources object
 - typed model output validation
 - trace events
+- replayable regression JSONL
 - external content boundaries
 - offline smoke coverage

@@ -1,50 +1,74 @@
 # Gemini Interactions Doctor
 
-Gemini Interactions Doctor is a local readiness checker for Gemini apps moving from simple model calls to stateful, tool-using workflows. It scans a repo for fragile harness patterns - manual chat history, vague tool schemas, risky side effects, brittle structured-output parsing, missing trace events, unsupported grounding claims, and missing smoke tests - then produces a migration plan and safe starter patches.
+Gemini Interactions Doctor is a local readiness checker for Gemini apps moving from quick prototypes to stateful, tool-using workflows. It scans a repo for fragile harness patterns - one-shot calls used for multi-step flows, manual state strings, vague tool schemas, side-effecting tools without machine-readable approval, brittle structured-output parsing, missing trace events, unsupported grounding claims, and missing smoke tests - then produces a migration plan and safe starter patches.
+
+One-line positioning:
+
+> Gemini Interactions Doctor helps Gemini apps graduate from one-shot calls to reliable stateful, tool-using workflows.
 
 ## What Is Gemini Interactions Doctor?
 
-Gemini Interactions Doctor helps Gemini apps graduate from one-shot calls to reliable stateful, tool-using workflows.
+Gemini Interactions Doctor is an external local developer tool for Gemini and AI Studio builders moving from prototype to maintainable Gemini workflow.
 
-It is a focused local analyzer for Gemini application harnesses. It reads source files, finds evidence-backed interaction risks, and emits:
+It looks at the harness around the Gemini call:
 
-- an Interactions/API readiness report
-- a prioritized migration plan
-- safe patch suggestions
-- optional starter files for logging, structured outputs, AI instructions, and smoke tests
+- how state is represented
+- how function/tool calls are described
+- how side effects are approved
+- how structured outputs are validated
+- how tool calls and results are traced
+- how grounding or sources are represented
+- how primary AI paths are smoke-tested or replayed
 
-This is not a generic linter, a benchmark, a multi-model framework, or official Google tooling.
+It is not a generic linter, benchmark, multi-model framework, or official Google tool.
 
 ## Why This Exists
 
-Many Gemini prototypes start with one prompt and one `generateContent` or `generate_content` call. That is fine for early experiments. The friction appears when the app grows into a workflow with state, tools, structured outputs, grounding claims, side effects, logs, and tests.
+Many Gemini prototypes start as a single prompt and one `generateContent` or `generate_content` call. That is useful for learning and fast demos. The trouble starts when the same harness begins handling previous turns, tools, support tickets, research steps, structured JSON, citations, approval flows, and tests.
 
-Interactions Doctor focuses on the harness around the model call: the part that determines whether a prototype can support iteration without becoming brittle.
+Interactions Doctor focuses on that migration point:
+
+```text
+quick Gemini prototype -> maintainable stateful Gemini workflow
+```
+
+It gives builders evidence-backed findings, a migration order, and starter files they can adapt locally.
 
 ## 60-Second Demo
 
 ```bash
+python -m pip install -e .
 gdoctor demo
 ```
 
-The demo scans `examples/fragile-gemini-app`, reports `NOT_READY`, writes safe patch starter files under `patches/fragile-gemini-app`, and then scans `examples/upgraded-gemini-app` to show a safer shape.
+The demo scans `examples/fragile-gemini-app`, writes starter patches, then scans `examples/upgraded-gemini-app`.
 
-Expected terminal shape:
+Expected shape:
 
 ```text
 Gemini Interactions Doctor
 
 Target: examples/fragile-gemini-app
 Readiness: NOT_READY
+Score: 0 / 100
 Migration blockers:
   - one-shot model call used for multi-turn workflow
   - destructive tool lacks approval boundary
   - freeform output parsed as JSON
   - no trace events for tool calls
   - no primary AI smoke test
+  - simple model call used where structured interaction state is needed
+  - no structured interaction/event model
+  - tool result is not represented separately from model text
+  - grounded answer path not represented as evidence object
 
 Patch suggestions written:
   patches/fragile-gemini-app/
+
+Fixed example
+Target: examples/upgraded-gemini-app
+Readiness: READY
+Score: 100 / 100
 ```
 
 ## Install
@@ -70,11 +94,14 @@ gdoctor scan ./examples/fragile-gemini-app --out reports/fragile --html
 gdoctor plan ./examples/fragile-gemini-app --out reports/fragile-plan.md
 gdoctor patch ./examples/fragile-gemini-app --out patches/fragile
 gdoctor scan ./examples/upgraded-gemini-app --out reports/upgraded --html
-gdoctor demo
+gdoctor rules
 gdoctor doctor
+gdoctor demo
 ```
 
 ## Example Report
+
+The HTML report opens with:
 
 ```text
 Gemini Interactions Doctor
@@ -83,7 +110,7 @@ Readiness report for fragile-gemini-app
 Readiness: NOT_READY
 Score: 0 / 100
 
-Migration blockers:
+Top migration blockers:
 1. one-shot model call used for multi-turn workflow
 2. destructive tool lacks approval boundary
 3. freeform output parsed as JSON
@@ -91,13 +118,15 @@ Migration blockers:
 5. no primary AI smoke test
 ```
 
-Markdown reports are designed to paste into a GitHub issue or PR description. HTML reports are self-contained and require no external assets.
+Markdown reports are designed to paste into a GitHub issue or PR description.
 
 ## What It Checks
 
-Interactions Doctor implements 12 Gemini interaction-readiness rules:
+`gdoctor rules` lists every rule with id, title, severity, category, and purpose.
 
-- `GD001` one-shot call used for multi-turn or agentic workflow
+Current checks:
+
+- `GD001` one-shot model call used for multi-turn workflow
 - `GD002` manual chat history is fragile
 - `GD003` destructive tool lacks approval boundary
 - `GD004` tool schema too vague
@@ -109,46 +138,76 @@ Interactions Doctor implements 12 Gemini interaction-readiness rules:
 - `GD010` grounding claim without grounding path
 - `GD011` prompt injection boundary missing
 - `GD012` missing `AGENTS.md` or project-specific AI instructions
+- `GD013` simple model call used where structured interaction state is needed
+- `GD014` no structured interaction/event model
+- `GD015` tool result is not represented separately from model text
+- `GD016` no replayable test case format
+- `GD017` grounded answer path not represented as evidence object
+- `GD018` approval boundary not machine-readable
+
+## Why This Is Not Just A Linter
+
+Linters usually catch local code style or static errors. Interactions Doctor looks for harness-readiness patterns: whether state, tools, outputs, evidence, and traces are represented in a way that a Gemini app can be debugged, replayed, and improved.
+
+The core question is not "Is this line valid Python or TypeScript?" It is "Can this Gemini workflow survive tools, state, retries, evidence, and tests?"
 
 ## Patch Generation
 
 `gdoctor patch` writes starter files into the output directory and does not mutate the scanned app by default.
 
-Generated files can include:
+Generated files:
 
 - `.env.example`
 - `AGENTS.md`
 - `tests/test_ai_smoke.py`
+- `observability/interaction_event_schema.json`
 - `observability/trace_schema.json`
+- `evals/sample_interaction_regression.jsonl`
 - `prompts/structured_output_prompt.md`
 - `prompts/external_content_boundary.md`
 - `tools/approval_boundary_example.json`
 - `MIGRATION_PLAN.md`
 
-The generated files are intentionally conservative. They are meant to give a builder a safe starting point, not silently rewrite app logic.
+These are safe starting points, not automatic rewrites.
+
+## Recommended Migration Order
+
+1. Move from brittle string prompts to structured messages/events.
+2. Make tool calls and tool results first-class objects.
+3. Add machine-readable approval boundaries for side-effecting tools.
+4. Add structured output validation.
+5. Add trace events and run IDs.
+6. Add one replayable smoke/regression test.
+7. Tighten grounding/evidence claims.
 
 ## How This Relates To Gemini / AI Studio
 
-Interactions Doctor is for builders using Gemini APIs or graduating AI Studio-style prototypes into local app code. It looks for harness patterns that commonly appear when a prototype starts handling turns, tools, structured responses, and evidence.
+Interactions Doctor is for builders using Gemini APIs or graduating AI Studio-style prototypes into local app code. It looks for harness patterns that commonly appear when a prototype starts handling turns, tools, structured responses, side effects, and evidence.
 
-It is an external local tool. It does not claim to be endorsed by Google, and it does not replace Gemini API documentation or production review.
+It does not require internal APIs. It does not know private AI Studio roadmap details. It is an external local tool that uses static heuristics and templates.
 
-## How This Is Different From ShipCheck
+## How This Differs From ShipCheck And Flight Recorder
 
-ShipCheck asks: "Should I share or deploy this Gemini app yet?"
+- **ShipCheck** asks: "Should I share or deploy this Gemini app yet?"
+- **Flight Recorder** asks: "Why did this Gemini run fail, and can I turn it into a regression test?"
+- **Interactions Doctor** asks: "Is this Gemini app harness wired for state, tools, tests, and iteration?"
 
-Interactions Doctor asks: "Is my Gemini app harness wired in a way that can support state, tools, tests, and iteration?"
+In a three-tool suite:
 
-That distinction matters. Interactions Doctor is about migration readiness and developer workflow, not broad launch approval.
+- `ai-studio-shipcheck` is about share/deploy readiness.
+- `gemini-flight-recorder` is about debugging a run and turning failure into regression coverage.
+- `gemini-interactions-doctor` is about harness readiness before the workflow grows brittle.
 
-## What It Does Not Do
+## What This Does Not Do
 
-- It does not call Gemini.
-- It does not send source code to a remote service.
-- It does not guarantee production readiness.
-- It does not automatically rewrite application logic.
-- It does not prove that tools are safe.
-- It does not replace security, privacy, legal, or reliability review.
+- Not official Google tooling.
+- Not affiliated with Google.
+- Does not guarantee production readiness.
+- Does not replace security review.
+- Does not require internal APIs.
+- Does not know private AI Studio roadmap details.
+- Uses static heuristics and safe patch templates.
+- Does not automatically rewrite application logic.
 
 ## Design Principles
 
@@ -159,6 +218,16 @@ That distinction matters. Interactions Doctor is about migration readiness and d
 - Local-first and offline-demoable.
 - Helps builders graduate prototypes into maintainable apps.
 
+## Development
+
+```bash
+make test
+make demo
+make acceptance
+```
+
+The acceptance flow runs tests, scans both examples, renders reports, generates patches, lists rules, and checks local installation health.
+
 ## Roadmap
 
 - More language-specific Gemini SDK detectors.
@@ -166,7 +235,8 @@ That distinction matters. Interactions Doctor is about migration readiness and d
 - Framework-aware project profiles.
 - Safer codemod previews for trivial harness upgrades.
 - Report comparison across migration iterations.
+- Import/export from failed run traces produced by companion tooling.
 
 ## Disclaimer
 
-Gemini Interactions Doctor is an independent developer-experience artifact. It is not official Google tooling and does not guarantee that an application is ready for production, sharing, or deployment.
+Gemini Interactions Doctor is an independent developer-experience artifact. It is not official Google tooling, is not affiliated with Google, and does not guarantee that an application is ready for production, sharing, or deployment.

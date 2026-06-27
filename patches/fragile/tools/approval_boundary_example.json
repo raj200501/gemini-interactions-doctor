@@ -2,6 +2,9 @@
   "tool": "refund_customer",
   "mode": "propose_then_execute",
   "approval_required": true,
+  "requiresApproval": true,
+  "side_effect": "refunds money or changes account state",
+  "risk_level": "high",
   "approval_fields": [
     "run_id",
     "customer_id",

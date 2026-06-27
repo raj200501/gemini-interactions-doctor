@@ -7,9 +7,67 @@ from jinja2 import Template
 
 from gdoctor.models import Issue, ScanReport
 
+GENERATED_STARTER_FILES = [
+    ".env.example",
+    "AGENTS.md",
+    "tests/test_ai_smoke.py",
+    "observability/interaction_event_schema.json",
+    "observability/trace_schema.json",
+    "evals/sample_interaction_regression.jsonl",
+    "prompts/structured_output_prompt.md",
+    "prompts/external_content_boundary.md",
+    "tools/approval_boundary_example.json",
+    "MIGRATION_PLAN.md",
+]
+
+RECOMMENDED_MIGRATION_ORDER = [
+    "Move from brittle string prompts to structured messages/events.",
+    "Make tool calls and tool results first-class objects.",
+    "Add machine-readable approval boundaries for side-effecting tools.",
+    "Add structured output validation.",
+    "Add trace events and run IDs.",
+    "Add one replayable smoke/regression test.",
+    "Tighten grounding/evidence claims.",
+]
+
+TOP_BLOCKER_LABELS = {
+    "GD013": "Stateful workflow is wired through one-shot model calls.",
+    "GD014": "Tool calls/results are not represented as structured events.",
+    "GD015": "Tool calls/results are not represented as structured events.",
+    "GD003": "Destructive tool approval is not machine-readable.",
+    "GD018": "Destructive tool approval is not machine-readable.",
+    "GD006": "Model output is parsed as JSON without validation.",
+    "GD017": "Grounded answer claims lack an evidence object.",
+    "GD008": "Tool calls are missing trace events.",
+    "GD009": "Primary Gemini workflow is missing a smoke test.",
+}
+
+TOP_BLOCKER_ORDER = ["GD013", "GD014", "GD015", "GD003", "GD018", "GD006", "GD017", "GD008", "GD009"]
+
 
 def _target_name(report: ScanReport) -> str:
     return Path(report.target_path).name
+
+
+def top_migration_blockers(report: ScanReport, limit: int = 5) -> list[str]:
+    labels: list[str] = []
+    issues_by_rule = {issue.rule_id: issue for issue in report.issues}
+    for rule_id in TOP_BLOCKER_ORDER:
+        issue = issues_by_rule.get(rule_id)
+        if not issue:
+            continue
+        label = TOP_BLOCKER_LABELS.get(rule_id, issue.title)
+        if label not in labels:
+            labels.append(label)
+        if len(labels) == limit:
+            return labels
+    for issue in report.blockers:
+        label = TOP_BLOCKER_LABELS.get(issue.rule_id, issue.title)
+        if label not in labels:
+            labels.append(label)
+        if len(labels) == limit:
+            return labels
+    return labels
 
 
 def _issue_section(title: str, issues: list[Issue]) -> str:
@@ -41,7 +99,10 @@ def render_markdown(report: ScanReport) -> str:
     warnings = report.warnings
     notes = report.notes
     blocker_lines = "\n".join(f"{index}. {title}" for index, title in enumerate(report.migration_blockers, start=1)) or "None."
+    top_blocker_lines = "\n".join(f"{index}. {title}" for index, title in enumerate(top_migration_blockers(report), start=1)) or "None."
     patch_lines = "\n".join(f"- `{path}`" for path in report.suggested_patch_files) or "- No starter patch files recommended."
+    generated_files = "\n".join(f"- `{path}`" for path in GENERATED_STARTER_FILES)
+    migration_order = "\n".join(f"{index}. {step}" for index, step in enumerate(RECOMMENDED_MIGRATION_ORDER, start=1))
     next_steps = "\n".join(f"- {step}" for step in report.next_steps)
     guarantees = "\n".join(f"- {item}" for item in report.what_the_tool_does_not_guarantee)
 
@@ -56,19 +117,43 @@ Readiness report for `{_target_name(report)}`
 
 ## Summary
 
-Gemini Interactions Doctor checks whether this Gemini app harness appears ready to support state, tools, structured outputs, traceability, and iteration.
+Gemini Interactions Doctor checks whether this Gemini app harness appears ready to support stateful interactions, function/tool calling, structured outputs, traceability, evidence, and iteration.
+
+## Readiness Scoring
+
+Score starts at `100`.
+
+- Blocker: `-20`
+- Warning: `-8`
+- Note: `-3`
+
+Readiness is `NOT_READY` when any blocker exists or score is below `70`, `READY_WITH_CAUTION` from `70-89` with no blockers, and `READY` at `90+` with no blockers.
 
 ## Migration Blockers
 
 {blocker_lines}
 
+## Top Migration Blockers
+
+{top_blocker_lines}
+
 ## Patch Suggestions
 
 {patch_lines}
 
+## Generated Starter Files
+
+`gdoctor patch` writes these safe starters into the output directory without mutating the scanned app:
+
+{generated_files}
+
+## Recommended Migration Order
+
+{migration_order}
+
 {_issue_section("Warnings", warnings)}
 
-{_issue_section("Evidence", blockers + notes)}
+{_issue_section("Evidence Snippets", blockers + notes)}
 
 ## Generated Files
 
@@ -286,6 +371,18 @@ HTML_TEMPLATE = Template(
           <p class="metric-value">{{ report.warnings|length }}</p>
         </div>
       </div>
+      <div class="panel">
+        <h2>Top Migration Blockers</h2>
+        {% if report.blockers %}
+        <ol>
+          {% for blocker in top_blockers %}
+          <li>{{ blocker }}</li>
+          {% endfor %}
+        </ol>
+        {% else %}
+        <p>No blocker findings.</p>
+        {% endif %}
+      </div>
     </div>
   </header>
   <main class="wrap">
@@ -294,6 +391,14 @@ HTML_TEMPLATE = Template(
       <div class="panel">
         <p><strong>Target:</strong> <code>{{ report.target_path }}</code></p>
         <p><strong>Scan time:</strong> <code>{{ report.scan_time }}</code></p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Readiness Scoring</h2>
+      <div class="panel">
+        <p>Score starts at <code>100</code>. Blockers subtract <code>20</code>, warnings subtract <code>8</code>, and notes subtract <code>3</code>.</p>
+        <p><code>NOT_READY</code> means a blocker exists or score is below <code>70</code>. <code>READY_WITH_CAUTION</code> means no blockers and score from <code>70-89</code>. <code>READY</code> means no blockers and score is <code>90+</code>.</p>
       </div>
     </section>
 
@@ -322,7 +427,7 @@ HTML_TEMPLATE = Template(
     </section>
 
     <section>
-      <h2>Evidence</h2>
+      <h2>Evidence Snippets</h2>
       <div class="issue-list">
         {% for issue in report.blockers + report.notes %}
         {{ render_issue(issue) }}
@@ -348,6 +453,11 @@ HTML_TEMPLATE = Template(
       <div class="panel">
         <h2>Generated Files</h2>
         <p>Run <code>gdoctor patch {{ report.target_path }} --out patches/{{ target }}</code> to write safe starter files.</p>
+        <ul>
+          {% for file in generated_files %}
+          <li><code>{{ file }}</code></li>
+          {% endfor %}
+        </ul>
       </div>
     </section>
 
@@ -360,6 +470,17 @@ HTML_TEMPLATE = Template(
           {% endfor %}
         </ul>
       </div>
+      <div class="panel">
+        <h2>Recommended Migration Order</h2>
+        <ol>
+          {% for step in migration_order %}
+          <li>{{ step }}</li>
+          {% endfor %}
+        </ol>
+      </div>
+    </section>
+
+    <section>
       <div class="panel">
         <h2>What This Does Not Guarantee</h2>
         <ul>
@@ -400,6 +521,9 @@ def render_html(report: ScanReport) -> str:
         report=report,
         target=_target_name(report),
         render_issue=_render_issue_html,
+        generated_files=GENERATED_STARTER_FILES,
+        migration_order=RECOMMENDED_MIGRATION_ORDER,
+        top_blockers=top_migration_blockers(report),
     )
 
 
@@ -407,7 +531,9 @@ def render_plan(report: ScanReport) -> str:
     blocker_lines = "\n".join(f"{index}. {issue.title} (`{issue.rule_id}`)" for index, issue in enumerate(report.blockers, start=1)) or "None."
     warning_lines = "\n".join(f"- {issue.title} (`{issue.rule_id}`)" for issue in report.warnings) or "- None."
     patch_lines = "\n".join(f"- `{path}`" for path in report.suggested_patch_files) or "- No starter patch files recommended."
-    next_steps = "\n".join(f"- {step}" for step in report.next_steps)
+    generated_files = "\n".join(f"- `{path}`" for path in GENERATED_STARTER_FILES)
+    migration_order = "\n".join(f"{index}. {step}" for index, step in enumerate(RECOMMENDED_MIGRATION_ORDER, start=1))
+    manual_work = "\n".join(f"- {step}" for step in report.next_steps)
 
     return f"""# Gemini Interaction Migration Plan
 
@@ -415,21 +541,42 @@ Target: `{report.target_path}`
 Readiness: `{report.readiness}`
 Score: `{report.score} / 100`
 
-## Priority 1: Migration Blockers
+## Current Readiness
+
+This app is `{report.readiness}` with a score of `{report.score} / 100`.
+
+## Top Blockers
 
 {blocker_lines}
 
-## Priority 2: Warnings
+## Warnings
 
 {warning_lines}
 
-## Safe Starter Patches
+## Generated Starter Files
+
+`gdoctor patch` can generate these files without mutating the source app:
+
+{generated_files}
+
+## Recommended Migration Order
+
+{migration_order}
+
+## Suggested Patch Files For This Scan
 
 {patch_lines}
 
-## Recommended Sequence
+## What To Do Manually
 
-{next_steps}
+{manual_work}
+
+## What Not To Overbuild
+
+- Do not build a full eval platform before you have one replayable scenario.
+- Do not rewrite the app before making state, tool calls, and tool results visible.
+- Do not add production observability before defining the local trace event shape.
+- Do not claim grounding unless evidence is represented as data.
 
 ## Reminder
 

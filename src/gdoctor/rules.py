@@ -5,6 +5,145 @@ import re
 from gdoctor.models import Issue, Severity
 from gdoctor.scanner import ScanContext, SourceFile
 
+RULE_CATALOG = [
+    {
+        "rule_id": "GD001",
+        "title": "one-shot model call used for multi-turn workflow",
+        "severity": "blocker",
+        "category": "state",
+        "purpose": "Find Gemini workflows that appear to manage state or tools through ad hoc generateContent calls.",
+    },
+    {
+        "rule_id": "GD002",
+        "title": "manual chat history is fragile",
+        "severity": "warning",
+        "category": "state",
+        "purpose": "Find brittle history strings instead of structured messages or events.",
+    },
+    {
+        "rule_id": "GD003",
+        "title": "destructive tool lacks approval boundary",
+        "severity": "blocker",
+        "category": "tools",
+        "purpose": "Find side-effecting tools without an approval boundary.",
+    },
+    {
+        "rule_id": "GD004",
+        "title": "tool schema too vague",
+        "severity": "warning",
+        "category": "tools",
+        "purpose": "Find Gemini tool declarations that do not give the model enough calling context.",
+    },
+    {
+        "rule_id": "GD005",
+        "title": "broad data access tool",
+        "severity": "warning",
+        "category": "tools",
+        "purpose": "Find broad retrieval tools that should be scoped before model use.",
+    },
+    {
+        "rule_id": "GD006",
+        "title": "freeform output parsed as JSON",
+        "severity": "blocker",
+        "category": "structured-output",
+        "purpose": "Find brittle parsing of model text without validation.",
+    },
+    {
+        "rule_id": "GD007",
+        "title": "missing structured output contract",
+        "severity": "warning",
+        "category": "structured-output",
+        "purpose": "Find code that expects fields without an explicit response contract.",
+    },
+    {
+        "rule_id": "GD008",
+        "title": "no trace events for tool calls",
+        "severity": "blocker",
+        "category": "observability",
+        "purpose": "Find tool workflows without trace events for debugging and replay.",
+    },
+    {
+        "rule_id": "GD009",
+        "title": "no primary AI smoke test",
+        "severity": "blocker",
+        "category": "tests",
+        "purpose": "Find stateful or tool-using Gemini workflows without a fast smoke test.",
+    },
+    {
+        "rule_id": "GD010",
+        "title": "grounding claim without grounding path",
+        "severity": "warning",
+        "category": "grounding",
+        "purpose": "Find verified/current/cited UI claims without a visible evidence path.",
+    },
+    {
+        "rule_id": "GD011",
+        "title": "prompt injection boundary missing",
+        "severity": "warning",
+        "category": "prompt-safety",
+        "purpose": "Find external content inserted into prompts without untrusted-content boundaries.",
+    },
+    {
+        "rule_id": "GD012",
+        "title": "missing AGENTS.md or project-specific AI instructions",
+        "severity": "warning",
+        "category": "project-instructions",
+        "purpose": "Find Gemini app repos without local AI coding and harness instructions.",
+    },
+    {
+        "rule_id": "GD013",
+        "title": "simple model call used where structured interaction state is needed",
+        "severity": "blocker",
+        "category": "state",
+        "purpose": "Find prototype-style model calls in apps that now show state, tools, or workflow steps.",
+    },
+    {
+        "rule_id": "GD014",
+        "title": "no structured interaction/event model",
+        "severity": "blocker",
+        "category": "state",
+        "purpose": "Find stateful or tool-using apps without Message, ToolCall, ToolResult, run, or event objects.",
+    },
+    {
+        "rule_id": "GD015",
+        "title": "tool result is not represented separately from model text",
+        "severity": "blocker",
+        "category": "tools",
+        "purpose": "Find tool outputs pasted into prompts instead of represented as replayable result objects.",
+    },
+    {
+        "rule_id": "GD016",
+        "title": "no replayable test case format",
+        "severity": "warning",
+        "category": "tests",
+        "purpose": "Find stateful Gemini workflows without a saved JSON/JSONL scenario for regression replay.",
+    },
+    {
+        "rule_id": "GD017",
+        "title": "grounded answer path not represented as evidence object",
+        "severity": "blocker",
+        "category": "grounding",
+        "purpose": "Find source-backed claims that live only in final answer text instead of evidence data.",
+    },
+    {
+        "rule_id": "GD018",
+        "title": "approval boundary not machine-readable",
+        "severity": "warning",
+        "category": "tools",
+        "purpose": "Find destructive tools where approval exists only in prose, not schema fields code can inspect.",
+    },
+]
+
+
+DESTRUCTIVE_TOOL_PATTERN = (
+    r"def\s+(refund|delete|charge|cancel|transfer|disable|update)_\w+|"
+    r"['\"]name['\"]\s*:\s*['\"](refund|delete|charge|cancel|transfer|disable|update)_\w+"
+)
+
+STRUCTURED_EVENT_PATTERN = (
+    r"TraceEvent|InteractionEvent|MessageEvent|Message\b|ToolCall|ToolResult|run_id|conversation_id|event_id|InteractionState"
+)
+
 
 def _snippet(text: str) -> str:
     compact = " ".join(text.strip().split())
@@ -60,11 +199,7 @@ def gd001_one_shot_agentic_workflow(ctx: ScanContext) -> list[Issue]:
     generate = ctx.first_match(r"generateContent|generate_content")
     if not generate:
         return []
-    agentic_signals = ctx.any_match(r"\bhistory\b|\bconversation\b|\btools?\b|\bworkflow\b|\bmulti[-_ ]?turn\b|\bsteps?\b")
-    state_abstraction = ctx.any_match(
-        r"class\s+\w*(State|Session|Conversation|Interaction)|MessageEvent|InteractionEvent|start_chat|chats\.create|ChatSession|session_id"
-    )
-    if agentic_signals and not state_abstraction:
+    if ctx.needs_interaction_harness and not ctx.has_structured_event_model:
         return [
             _issue(
                 rule_id="GD001",
@@ -107,12 +242,12 @@ def gd002_manual_chat_history(ctx: ScanContext) -> list[Issue]:
 
 
 def gd003_destructive_tool_approval(ctx: ScanContext) -> list[Issue]:
-    match = ctx.first_match(
-        r"def\s+(refund|delete|charge|cancel|transfer|disable|update)_\w+|['\"]name['\"]\s*:\s*['\"](refund|delete|charge|cancel|transfer|disable|update)_\w+"
-    )
+    match = ctx.first_match(DESTRUCTIVE_TOOL_PATTERN)
     if not match:
         return []
-    has_approval = ctx.any_match(r"approval|approve|approved_by|confirm|human_review|requires_approval|ApprovalBoundary")
+    has_approval = ctx.has_machine_readable_approval or ctx.any_match(
+        r"ApprovalDecision|ApprovalBoundary|approved_by\s*[:=]|approved_at\s*[:=]|approval\s*:\s*ApprovalDecision"
+    )
     if has_approval:
         return []
     return [
@@ -185,7 +320,9 @@ def gd006_freeform_json_parse(ctx: ScanContext) -> list[Issue]:
     match = ctx.first_match(r"JSON\.parse\(.*(text|response|model)|json\.loads\((response|.*\.text|model_text|raw_text|model_output)")
     if not match:
         return []
-    has_validation = ctx.any_match(r"model_validate_json|TypeAdapter|response_schema|json_schema|BaseModel|pydantic|zod|schema\.parse")
+    has_validation = ctx.any_match(
+        r"model_validate_json|model_validate\(|TypeAdapter|response_schema|json_schema|BaseModel|pydantic|zod|schema\.parse|jsonschema\.validate|validate\(.*schema"
+    )
     if has_validation:
         return []
     return [
@@ -230,8 +367,7 @@ def gd007_missing_structured_contract(ctx: ScanContext) -> list[Issue]:
 
 
 def gd008_no_trace_events(ctx: ScanContext) -> list[Issue]:
-    has_tools = ctx.any_match(r"\btools\s*=|function_declarations|@tool|Tool\(|def\s+(refund|delete|charge|get_customer|lookup|search|export)_\w+")
-    if not has_tools:
+    if not ctx.has_tool_definitions:
         return []
     has_trace = ctx.any_match(r"trace_event|tool_call|run_event|span_id|observability|emit_trace|logger\.(info|debug)\(.*tool")
     if has_trace:
@@ -255,7 +391,7 @@ def gd008_no_trace_events(ctx: ScanContext) -> list[Issue]:
 
 
 def gd009_no_ai_smoke_test(ctx: ScanContext) -> list[Issue]:
-    if not ctx.uses_gemini:
+    if not ctx.uses_gemini or not ctx.needs_interaction_harness:
         return []
     for source_file in ctx.files:
         name = source_file.relative_path.lower()
@@ -350,6 +486,154 @@ def gd012_missing_agents_md(ctx: ScanContext) -> list[Issue]:
     ]
 
 
+def gd013_simple_call_needs_interaction_state(ctx: ScanContext) -> list[Issue]:
+    if not ctx.uses_gemini or not ctx.needs_interaction_harness:
+        return []
+    generate = ctx.first_match(r"generateContent|generate_content")
+    raw_prompt_state = ctx.any_match(r"prompt\s*=.*(history|conversation|tool_result|toolResult|previous_turns|email_body|ticket_text)")
+    if not generate or ctx.has_structured_event_model:
+        return []
+    if not (ctx.has_tool_definitions or raw_prompt_state or ctx.has_multiturn_or_workflow_signals):
+        return []
+    return [
+        _issue(
+            rule_id="GD013",
+            title="simple model call used where structured interaction state is needed",
+            severity="blocker",
+            category="state",
+            match=generate,
+            fallback_file="(project root)",
+            why_it_matters="This may be fine for a one-shot prompt, but this app appears to manage state/tools/workflow steps. A structured interaction/event layer will be easier to debug, replay, and test.",
+            gemini_relevance="Gemini app harnesses become more reliable when turns, tool calls, tool results, and model responses are represented before prompt rendering.",
+            migration_advice="Introduce InteractionEvent, Message, ToolCall, and ToolResult records, then render Gemini prompts from those records.",
+            safe_patch_available=True,
+            confidence=0.86,
+        )
+    ]
+
+
+def gd014_no_structured_interaction_event_model(ctx: ScanContext) -> list[Issue]:
+    if not ctx.uses_gemini or not ctx.needs_interaction_harness or ctx.has_structured_event_model:
+        return []
+    match = ctx.first_match(r"\bhistory\b|\bconversation\b|\btools\s*=|function_declarations|workflow|support ticket|research assistant")
+    return [
+        _issue(
+            rule_id="GD014",
+            title="no structured interaction/event model",
+            severity="blocker",
+            category="state",
+            match=match,
+            fallback_file="(project root)",
+            why_it_matters="Stateful Gemini apps are hard to debug when messages, tool calls, tool results, approvals, and run IDs are not first-class objects.",
+            gemini_relevance="A structured event model gives Gemini API builders a local shape for replay, trace logs, smoke tests, and migration from AI Studio prototypes.",
+            migration_advice="Add an InteractionEvent schema with run_id, event_id, role/type, content, tool call metadata, tool result metadata, and timestamps.",
+            safe_patch_available=True,
+            confidence=0.84,
+        )
+    ]
+
+
+def gd015_tool_result_not_represented_separately(ctx: ScanContext) -> list[Issue]:
+    if not ctx.has_tool_definitions:
+        return []
+    match = ctx.first_match(
+        r"prompt\s*(\+=|=).*tool[_]?result|tool[_]?result.*prompt|f['\"].*\{tool[_]?result\}|contents\s*=.*tool[_]?result|answer\s*=.*tool[_]?result"
+    )
+    if not match:
+        return []
+    if ctx.any_match(r"ToolResult|tool_result\s*=\s*\{|tool_result\s*=\s*Tool|tool_results\s*:\s*list|tool_results\s*=\s*\["):
+        return []
+    return [
+        _issue(
+            rule_id="GD015",
+            title="tool result is not represented separately from model text",
+            severity="blocker",
+            category="tools",
+            match=match,
+            fallback_file="(project root)",
+            why_it_matters="Tool-using Gemini apps are easier to debug and replay when tool calls and tool results are first-class events.",
+            gemini_relevance="Gemini function-calling workflows need a durable boundary between the model message, the tool execution, and the tool result.",
+            migration_advice="Create a ToolResult object with tool name, arguments, result payload, status, and trace IDs before using it in prompt rendering.",
+            safe_patch_available=True,
+            confidence=0.82,
+        )
+    ]
+
+
+def gd016_no_replayable_test_case_format(ctx: ScanContext) -> list[Issue]:
+    if not ctx.uses_gemini or not ctx.needs_interaction_harness or ctx.has_replayable_case_format:
+        return []
+    match = ctx.first_match(r"\btools\s*=|workflow|support ticket|research assistant|generateContent|generate_content")
+    return [
+        _issue(
+            rule_id="GD016",
+            title="no replayable test case format",
+            severity="warning",
+            category="tests",
+            match=match,
+            fallback_file="(project root)",
+            why_it_matters="Not every app needs a full eval suite, but stateful Gemini workflows benefit from at least one replayable scenario.",
+            gemini_relevance="Replayable JSONL scenarios help builders turn AI Studio-style examples and failed Gemini runs into local regression coverage.",
+            migration_advice="Add a JSONL scenario with user input, expected tool calls, expected structured output fields, and evidence expectations.",
+            safe_patch_available=True,
+            confidence=0.78,
+        )
+    ]
+
+
+def gd017_grounded_path_not_evidence_object(ctx: ScanContext) -> list[Issue]:
+    match = ctx.first_match(r"\b(source-backed|source backed|verified|cited|grounded|sources?:)\b")
+    if not match:
+        return []
+    has_evidence_object = ctx.any_match(
+        r"\bevidence\b\s*[:=]|\bsources\b\s*[:=]|\bcitations\b\s*[:=]|grounding_metadata|class\s+\w*(Evidence|Citation|Source)"
+    )
+    if has_evidence_object:
+        return []
+    freeform_claim = ctx.any_match(r"answer\s*=.*(source|verified|cited|grounded)|banner\s*=.*(source|verified|cited|grounded)|return\s+\{[^}]*['\"]answer['\"][^}]*")
+    if not freeform_claim:
+        return []
+    return [
+        _issue(
+            rule_id="GD017",
+            title="grounded answer path not represented as evidence object",
+            severity="blocker",
+            category="grounding",
+            match=match,
+            fallback_file="(project root)",
+            why_it_matters="Grounded or source-backed answer claims should be represented as evidence data, not only as words in the final answer.",
+            gemini_relevance="Gemini apps that show sources need a durable evidence object so grounding can be tested, rendered, and audited.",
+            migration_advice="Add evidence, sources, citations, or grounding_metadata objects to the structured output and UI boundary.",
+            safe_patch_available=True,
+            confidence=0.8,
+        )
+    ]
+
+
+def gd018_approval_boundary_not_machine_readable(ctx: ScanContext) -> list[Issue]:
+    match = ctx.first_match(DESTRUCTIVE_TOOL_PATTERN)
+    if not match:
+        return []
+    has_prose_approval = ctx.any_match(r"approval|approve|approved_by|confirm|human_review|human approval|reviewed")
+    if not has_prose_approval or ctx.has_machine_readable_approval:
+        return []
+    return [
+        _issue(
+            rule_id="GD018",
+            title="approval boundary not machine-readable",
+            severity="warning",
+            category="tools",
+            match=match,
+            fallback_file="(project root)",
+            why_it_matters="Agent/tool harnesses need boundaries the code can inspect, not just README or prompt wording.",
+            gemini_relevance="Gemini tool schemas should expose side-effect risk and approval requirements in fields that orchestration code can enforce.",
+            migration_advice="Add requiresApproval, approval_required, requires_confirmation, dry_run, side_effect, or risk_level metadata to destructive tool schemas.",
+            safe_patch_available=True,
+            confidence=0.79,
+        )
+    ]
+
+
 ALL_RULES = [
     gd001_one_shot_agentic_workflow,
     gd002_manual_chat_history,
@@ -363,4 +647,10 @@ ALL_RULES = [
     gd010_grounding_claim,
     gd011_prompt_injection_boundary,
     gd012_missing_agents_md,
+    gd013_simple_call_needs_interaction_state,
+    gd014_no_structured_interaction_event_model,
+    gd015_tool_result_not_represented_separately,
+    gd016_no_replayable_test_case_format,
+    gd017_grounded_path_not_evidence_object,
+    gd018_approval_boundary_not_machine_readable,
 ]

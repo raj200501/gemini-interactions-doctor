@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Gemini interaction event",
+  "type": "object",
+  "required": [
+    "event_id",
+    "run_id",
+    "event_type",
+    "timestamp"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "description": "Unique event id for replay and trace correlation."
+    },
+    "run_id": {
+      "type": "string",
+      "description": "Shared id for one user-visible Gemini workflow."
+    },
+    "conversation_id": {
+      "type": "string",
+      "description": "Optional stable id across multiple runs or sessions."
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "message",
+        "model_request",
+        "model_response",
+        "tool_call",
+        "tool_result",
+        "approval",
+        "validation",
+        "error"
+      ]
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "user",
+        "assistant",
+        "tool",
+        "system"
+      ]
+    },
+    "content": {
+      "type": "string"
+    },
+    "tool_call": {
+      "type": "object",
+      "properties": {
+        "tool_name": {
+          "type": "string"
+        },
+        "arguments": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "approval_required": {
+          "type": "boolean"
+        },
+        "risk_level": {
+          "type": "string",
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "tool_result": {
+      "type": "object",
+      "properties": {
+        "tool_name": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "ok",
+            "blocked",
+            "failed"
+          ]
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "uri": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "kind",
+          "label"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

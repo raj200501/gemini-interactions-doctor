@@ -19,9 +19,12 @@ def test_markdown_and_html_report_rendering():
 
     assert "Gemini Interactions Doctor Readiness Report" in markdown
     assert "Migration Blockers" in markdown
+    assert "Recommended Migration Order" in markdown
     assert "<!doctype html>" in html
     assert "Readiness report for fragile-gemini-app" in html
+    assert "Top Migration Blockers" in html
     assert "Gemini Interaction Migration Plan" in plan
+    assert "What Not To Overbuild" in plan
 
 
 def test_patch_generation_writes_safe_starter_files(tmp_path):
@@ -32,7 +35,9 @@ def test_patch_generation_writes_safe_starter_files(tmp_path):
     assert ".env.example" in relative
     assert "AGENTS.md" in relative
     assert "tests/test_ai_smoke.py" in relative
+    assert "observability/interaction_event_schema.json" in relative
     assert "observability/trace_schema.json" in relative
+    assert "evals/sample_interaction_regression.jsonl" in relative
     assert "prompts/structured_output_prompt.md" in relative
     assert "prompts/external_content_boundary.md" in relative
     assert "tools/approval_boundary_example.json" in relative

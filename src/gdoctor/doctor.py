@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from importlib import metadata
+import os
 from pathlib import Path
 import sys
 
@@ -9,7 +10,8 @@ from rich.panel import Panel
 from rich.table import Table
 
 from gdoctor import __version__
-from gdoctor.patches import write_patch_files
+from gdoctor.patches import PATCH_TEMPLATE_NAMES, write_patch_files
+from gdoctor.reports import GENERATED_STARTER_FILES
 from gdoctor.scanner import scan_project
 
 
@@ -90,6 +92,9 @@ def run_doctor(console: Console) -> int:
     upgraded = root / "examples" / "upgraded-gemini-app"
     table.add_row("fragile example", "present" if fragile.exists() else "missing")
     table.add_row("upgraded example", "present" if upgraded.exists() else "missing")
+    table.add_row("report templates", "present" if GENERATED_STARTER_FILES else "missing")
+    table.add_row("patch templates", f"{len(PATCH_TEMPLATE_NAMES)} available")
+    table.add_row("Gemini API key", "present" if os.getenv("GEMINI_API_KEY") else "not present")
 
     console.print(table)
     if fragile.exists() and upgraded.exists():

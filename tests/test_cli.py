@@ -28,6 +28,15 @@ def test_cli_doctor(monkeypatch):
     assert result.exit_code == 0
     assert "gdoctor doctor" in result.output
     assert "Example scan health" in result.output
+    assert "Gemini API key" in result.output
+
+
+def test_cli_rules():
+    result = runner.invoke(app, ["rules"])
+
+    assert result.exit_code == 0
+    assert "Gemini Interactions Doctor Rules" in result.output
+    assert "GD018" in result.output
 
 
 def test_cli_scan_writes_markdown_and_html(tmp_path):
@@ -52,3 +61,5 @@ def test_cli_plan_and_patch(tmp_path):
     assert patch_result.exit_code == 0
     assert plan_out.exists()
     assert (patch_out / "AGENTS.md").exists()
+    assert (patch_out / "observability" / "interaction_event_schema.json").exists()
+    assert (patch_out / "evals" / "sample_interaction_regression.jsonl").exists()
