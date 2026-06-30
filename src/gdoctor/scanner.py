@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime, timezone
+import os
 from pathlib import Path
 import re
 
@@ -222,7 +223,8 @@ def build_next_steps(issues: list[Issue]) -> list[str]:
 def scan_project(target: str | Path) -> ScanReport:
     from gdoctor.rules import ALL_RULES
 
-    target_path = Path(target).resolve()
+    input_path = Path(target)
+    target_path = input_path.resolve()
     if not target_path.exists():
         raise FileNotFoundError(f"Target path does not exist: {target_path}")
     if not target_path.is_dir():
@@ -239,9 +241,12 @@ def scan_project(target: str | Path) -> ScanReport:
     readiness = readiness_for(issues, score)
     blockers = [issue.title for issue in issues if issue.severity == "blocker"]
 
+    report_target_path = input_path.as_posix() if not input_path.is_absolute() else target_path.as_posix()
+    scan_time = os.getenv("GDOCTOR_SCAN_TIME") or datetime.now(timezone.utc).isoformat(timespec="seconds")
+
     return ScanReport(
-        target_path=target_path.as_posix(),
-        scan_time=datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        target_path=report_target_path,
+        scan_time=scan_time,
         readiness=readiness,
         score=score,
         issues=issues,
@@ -251,10 +256,10 @@ def scan_project(target: str | Path) -> ScanReport:
         what_the_tool_does_not_guarantee=[
             "It is not official Google tooling and is not affiliated with Google.",
             "It does not know private AI Studio or Gemini roadmap details.",
-            "It does not prove production readiness.",
+            "It is not a production readiness assessment.",
             "It does not execute or call Gemini APIs.",
-            "It does not verify security, privacy, legal, or compliance posture.",
+            "It does not replace security, privacy, legal, or compliance review.",
             "It uses static heuristics and safe patch templates.",
-            "It does not guarantee that suggested patches are sufficient for your app architecture.",
+            "Suggested patches still need project-specific review.",
         ],
     )

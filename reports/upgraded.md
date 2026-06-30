@@ -2,8 +2,8 @@
 
 Readiness report for `upgraded-gemini-app`
 
-- Target: `/Users/rajkashikar/Documents/Codex/2026-06-26/you-are-codex-working-inside-a/gemini-interactions-doctor/examples/upgraded-gemini-app`
-- Scan time: `2026-06-27T04:32:29+00:00`
+- Target: `examples/upgraded-gemini-app`
+- Scan time: `2026-06-30T00:00:00+00:00`
 - Readiness: `READY`
 - Score: `100 / 100`
 
@@ -47,6 +47,7 @@ None.
 - `prompts/external_content_boundary.md`
 - `tools/approval_boundary_example.json`
 - `MIGRATION_PLAN.md`
+- `README.patch-notes.md`
 
 ## Recommended Migration Order
 
@@ -73,7 +74,7 @@ None.
 Run:
 
 ```bash
-gdoctor patch /Users/rajkashikar/Documents/Codex/2026-06-26/you-are-codex-working-inside-a/gemini-interactions-doctor/examples/upgraded-gemini-app --out patches/upgraded-gemini-app
+gdoctor patch examples/upgraded-gemini-app --out patches/upgraded-gemini-app
 ```
 
 ## Next Steps
@@ -86,8 +87,8 @@ gdoctor patch /Users/rajkashikar/Documents/Codex/2026-06-26/you-are-codex-workin
 
 - It is not official Google tooling and is not affiliated with Google.
 - It does not know private AI Studio or Gemini roadmap details.
-- It does not prove production readiness.
+- It is not a production readiness assessment.
 - It does not execute or call Gemini APIs.
-- It does not verify security, privacy, legal, or compliance posture.
+- It does not replace security, privacy, legal, or compliance review.
 - It uses static heuristics and safe patch templates.
-- It does not guarantee that suggested patches are sufficient for your app architecture.
+- Suggested patches still need project-specific review.

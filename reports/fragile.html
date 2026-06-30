@@ -197,21 +197,21 @@
       </div>
       <div class="panel">
         <h2>Top Migration Blockers</h2>
-        
+
         <ol>
-          
+
           <li>Stateful workflow is wired through one-shot model calls.</li>
-          
+
           <li>Tool calls/results are not represented as structured events.</li>
-          
+
           <li>Destructive tool approval is not machine-readable.</li>
-          
+
           <li>Model output is parsed as JSON without validation.</li>
-          
+
           <li>Grounded answer claims lack an evidence object.</li>
-          
+
         </ol>
-        
+
       </div>
     </div>
   </header>
@@ -219,8 +219,8 @@
     <section>
       <h2>Summary</h2>
       <div class="panel">
-        <p><strong>Target:</strong> <code>/Users/rajkashikar/Documents/Codex/2026-06-26/you-are-codex-working-inside-a/gemini-interactions-doctor/examples/fragile-gemini-app</code></p>
-        <p><strong>Scan time:</strong> <code>2026-06-27T04:32:29+00:00</code></p>
+        <p><strong>Target:</strong> <code>examples/fragile-gemini-app</code></p>
+        <p><strong>Scan time:</strong> <code>2026-06-30T00:00:00+00:00</code></p>
       </div>
     </section>
 
@@ -234,35 +234,35 @@
 
     <section>
       <h2>Migration Blockers</h2>
-      
+
       <ol>
-        
+
         <li>one-shot model call used for multi-turn workflow</li>
-        
+
         <li>destructive tool lacks approval boundary</li>
-        
+
         <li>freeform output parsed as JSON</li>
-        
+
         <li>no trace events for tool calls</li>
-        
+
         <li>no primary AI smoke test</li>
-        
+
         <li>simple model call used where structured interaction state is needed</li>
-        
+
         <li>no structured interaction/event model</li>
-        
+
         <li>tool result is not represented separately from model text</li>
-        
+
         <li>grounded answer path not represented as evidence object</li>
-        
+
       </ol>
-      
+
     </section>
 
     <section>
       <h2>Warnings</h2>
       <div class="issue-list">
-        
+
         <article class="issue">
   <div class="issue-head">
     <div>
@@ -277,7 +277,7 @@
   <p><strong>Migration advice:</strong> Represent turns as structured messages or events and render prompts from those records only at the model boundary.</p>
   <p><strong>Safe patch available:</strong> <code>false</code> · <strong>Confidence:</strong> <code>0.86</code></p>
 </article>
-        
+
         <article class="issue">
   <div class="issue-head">
     <div>
@@ -292,7 +292,7 @@
   <p><strong>Migration advice:</strong> Rewrite tool descriptions with concrete preconditions, side effects, and parameter meanings.</p>
   <p><strong>Safe patch available:</strong> <code>false</code> · <strong>Confidence:</strong> <code>0.78</code></p>
 </article>
-        
+
         <article class="issue">
   <div class="issue-head">
     <div>
@@ -307,7 +307,7 @@
   <p><strong>Migration advice:</strong> Replace broad tools with scoped lookup functions that require identifiers, filters, limits, and traceable purpose.</p>
   <p><strong>Safe patch available:</strong> <code>false</code> · <strong>Confidence:</strong> <code>0.82</code></p>
 </article>
-        
+
         <article class="issue">
   <div class="issue-head">
     <div>
@@ -322,7 +322,7 @@
   <p><strong>Migration advice:</strong> Tone down the claim or attach a source, URL, file, citation, or retrieval metadata object.</p>
   <p><strong>Safe patch available:</strong> <code>false</code> · <strong>Confidence:</strong> <code>0.70</code></p>
 </article>
-        
+
         <article class="issue">
   <div class="issue-head">
     <div>
@@ -337,7 +337,7 @@
   <p><strong>Migration advice:</strong> Wrap external content in explicit delimiters and instruct the model to treat it as data, not instructions.</p>
   <p><strong>Safe patch available:</strong> <code>true</code> · <strong>Confidence:</strong> <code>0.77</code></p>
 </article>
-        
+
         <article class="issue">
   <div class="issue-head">
     <div>
@@ -352,7 +352,7 @@
   <p><strong>Migration advice:</strong> Add an AGENTS.md that states the app&#x27;s Gemini integration patterns and safety expectations.</p>
   <p><strong>Safe patch available:</strong> <code>true</code> · <strong>Confidence:</strong> <code>0.74</code></p>
 </article>
-        
+
         <article class="issue">
   <div class="issue-head">
     <div>
@@ -367,7 +367,7 @@
   <p><strong>Migration advice:</strong> Add a JSONL scenario with user input, expected tool calls, expected structured output fields, and evidence expectations.</p>
   <p><strong>Safe patch available:</strong> <code>true</code> · <strong>Confidence:</strong> <code>0.78</code></p>
 </article>
-        
+
         <article class="issue">
   <div class="issue-head">
     <div>
@@ -382,14 +382,14 @@
   <p><strong>Migration advice:</strong> Add requiresApproval, approval_required, requires_confirmation, dry_run, side_effect, or risk_level metadata to destructive tool schemas.</p>
   <p><strong>Safe patch available:</strong> <code>true</code> · <strong>Confidence:</strong> <code>0.79</code></p>
 </article>
-        
+
       </div>
     </section>
 
     <section>
       <h2>Evidence Snippets</h2>
       <div class="issue-list">
-        
+
         <article class="issue">
   <div class="issue-head">
     <div>
@@ -404,7 +404,7 @@
   <p><strong>Migration advice:</strong> Introduce a session or event model before layering tools and multi-step behavior on top of ad hoc generateContent calls.</p>
   <p><strong>Safe patch available:</strong> <code>false</code> · <strong>Confidence:</strong> <code>0.84</code></p>
 </article>
-        
+
         <article class="issue">
   <div class="issue-head">
     <div>
@@ -419,7 +419,7 @@
   <p><strong>Migration advice:</strong> Split destructive tools into propose and execute phases, require approval metadata, and trace both decisions.</p>
   <p><strong>Safe patch available:</strong> <code>true</code> · <strong>Confidence:</strong> <code>0.90</code></p>
 </article>
-        
+
         <article class="issue">
   <div class="issue-head">
     <div>
@@ -434,7 +434,7 @@
   <p><strong>Migration advice:</strong> Add a structured output prompt or schema, then validate the response before downstream code uses it.</p>
   <p><strong>Safe patch available:</strong> <code>true</code> · <strong>Confidence:</strong> <code>0.88</code></p>
 </article>
-        
+
         <article class="issue">
   <div class="issue-head">
     <div>
@@ -449,7 +449,7 @@
   <p><strong>Migration advice:</strong> Emit structured trace events for model requests, tool calls, approval decisions, and response validation.</p>
   <p><strong>Safe patch available:</strong> <code>true</code> · <strong>Confidence:</strong> <code>0.83</code></p>
 </article>
-        
+
         <article class="issue">
   <div class="issue-head">
     <div>
@@ -464,7 +464,7 @@
   <p><strong>Migration advice:</strong> Add a smoke test that exercises the main Gemini workflow with a fake model or recorded response.</p>
   <p><strong>Safe patch available:</strong> <code>true</code> · <strong>Confidence:</strong> <code>0.81</code></p>
 </article>
-        
+
         <article class="issue">
   <div class="issue-head">
     <div>
@@ -479,7 +479,7 @@
   <p><strong>Migration advice:</strong> Introduce InteractionEvent, Message, ToolCall, and ToolResult records, then render Gemini prompts from those records.</p>
   <p><strong>Safe patch available:</strong> <code>true</code> · <strong>Confidence:</strong> <code>0.86</code></p>
 </article>
-        
+
         <article class="issue">
   <div class="issue-head">
     <div>
@@ -494,7 +494,7 @@
   <p><strong>Migration advice:</strong> Add an InteractionEvent schema with run_id, event_id, role/type, content, tool call metadata, tool result metadata, and timestamps.</p>
   <p><strong>Safe patch available:</strong> <code>true</code> · <strong>Confidence:</strong> <code>0.84</code></p>
 </article>
-        
+
         <article class="issue">
   <div class="issue-head">
     <div>
@@ -509,7 +509,7 @@
   <p><strong>Migration advice:</strong> Create a ToolResult object with tool name, arguments, result payload, status, and trace IDs before using it in prompt rendering.</p>
   <p><strong>Safe patch available:</strong> <code>true</code> · <strong>Confidence:</strong> <code>0.82</code></p>
 </article>
-        
+
         <article class="issue">
   <div class="issue-head">
     <div>
@@ -524,56 +524,58 @@
   <p><strong>Migration advice:</strong> Add evidence, sources, citations, or grounding_metadata objects to the structured output and UI boundary.</p>
   <p><strong>Safe patch available:</strong> <code>true</code> · <strong>Confidence:</strong> <code>0.80</code></p>
 </article>
-        
+
       </div>
     </section>
 
     <section class="cols">
       <div class="panel">
         <h2>Patch Suggestions</h2>
-        
+
         <ul>
-          
+
           <li><code>tools/approval_boundary_example.json</code></li>
-          
+
           <li><code>prompts/structured_output_prompt.md</code></li>
-          
+
           <li><code>observability/trace_schema.json</code></li>
-          
+
           <li><code>tests/test_ai_smoke.py</code></li>
-          
+
           <li><code>observability/interaction_event_schema.json</code></li>
-          
+
           <li><code>evals/sample_interaction_regression.jsonl</code></li>
-          
+
         </ul>
-        
+
       </div>
       <div class="panel">
         <h2>Generated Files</h2>
-        <p>Run <code>gdoctor patch /Users/rajkashikar/Documents/Codex/2026-06-26/you-are-codex-working-inside-a/gemini-interactions-doctor/examples/fragile-gemini-app --out patches/fragile-gemini-app</code> to write safe starter files.</p>
+        <p>Run <code>gdoctor patch examples/fragile-gemini-app --out patches/fragile-gemini-app</code> to write safe starter files.</p>
         <ul>
-          
+
           <li><code>.env.example</code></li>
-          
+
           <li><code>AGENTS.md</code></li>
-          
+
           <li><code>tests/test_ai_smoke.py</code></li>
-          
+
           <li><code>observability/interaction_event_schema.json</code></li>
-          
+
           <li><code>observability/trace_schema.json</code></li>
-          
+
           <li><code>evals/sample_interaction_regression.jsonl</code></li>
-          
+
           <li><code>prompts/structured_output_prompt.md</code></li>
-          
+
           <li><code>prompts/external_content_boundary.md</code></li>
-          
+
           <li><code>tools/approval_boundary_example.json</code></li>
-          
+
           <li><code>MIGRATION_PLAN.md</code></li>
-          
+
+          <li><code>README.patch-notes.md</code></li>
+
         </ul>
       </div>
     </section>
@@ -582,45 +584,45 @@
       <div class="panel">
         <h2>Next Steps</h2>
         <ul>
-          
+
           <li>Resolve blocker findings before treating the app as interaction-ready.</li>
-          
+
           <li>Move from brittle string prompts to structured messages and interaction events.</li>
-          
+
           <li>Represent tool calls and tool results as first-class objects before rendering prompts.</li>
-          
+
           <li>Add an explicit structured output contract and validate model responses against it.</li>
-          
+
           <li>Place machine-readable approval boundaries around destructive or irreversible tools.</li>
-          
+
           <li>Emit trace events for model calls, tool calls, approvals, and output validation.</li>
-          
+
           <li>Add one replayable smoke or regression test for the primary Gemini workflow.</li>
-          
+
           <li>Tighten grounded or source-backed claims so evidence is represented as data.</li>
-          
+
           <li>Work through warnings after blockers so the harness is easier to iterate on.</li>
-          
+
         </ul>
       </div>
       <div class="panel">
         <h2>Recommended Migration Order</h2>
         <ol>
-          
+
           <li>Move from brittle string prompts to structured messages/events.</li>
-          
+
           <li>Make tool calls and tool results first-class objects.</li>
-          
+
           <li>Add machine-readable approval boundaries for side-effecting tools.</li>
-          
+
           <li>Add structured output validation.</li>
-          
+
           <li>Add trace events and run IDs.</li>
-          
+
           <li>Add one replayable smoke/regression test.</li>
-          
+
           <li>Tighten grounding/evidence claims.</li>
-          
+
         </ol>
       </div>
     </section>
@@ -629,21 +631,21 @@
       <div class="panel">
         <h2>What This Does Not Guarantee</h2>
         <ul>
-          
+
           <li>It is not official Google tooling and is not affiliated with Google.</li>
-          
+
           <li>It does not know private AI Studio or Gemini roadmap details.</li>
-          
-          <li>It does not prove production readiness.</li>
-          
+
+          <li>It is not a production readiness assessment.</li>
+
           <li>It does not execute or call Gemini APIs.</li>
-          
-          <li>It does not verify security, privacy, legal, or compliance posture.</li>
-          
+
+          <li>It does not replace security, privacy, legal, or compliance review.</li>
+
           <li>It uses static heuristics and safe patch templates.</li>
-          
-          <li>It does not guarantee that suggested patches are sufficient for your app architecture.</li>
-          
+
+          <li>Suggested patches still need project-specific review.</li>
+
         </ul>
       </div>
     </section>

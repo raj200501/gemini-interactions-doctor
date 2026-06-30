@@ -76,7 +76,12 @@ Score: 100 / 100
 From a fresh clone:
 
 ```bash
-python -m pip install -e .
+git clone https://github.com/raj200501/gemini-interactions-doctor.git
+cd gemini-interactions-doctor
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -e ".[dev]"
+make verify
 ```
 
 For development:
@@ -84,6 +89,7 @@ For development:
 ```bash
 python -m pip install -e ".[dev]"
 python -m pytest
+make verify
 ```
 
 ## Usage
@@ -91,10 +97,13 @@ python -m pytest
 ```bash
 gdoctor scan ./examples/fragile-gemini-app
 gdoctor scan ./examples/fragile-gemini-app --out reports/fragile --html
+gdoctor scan ./examples/fragile-gemini-app --verbose
+gdoctor scan ./examples/upgraded-gemini-app --strict --quiet
 gdoctor plan ./examples/fragile-gemini-app --out reports/fragile-plan.md
 gdoctor patch ./examples/fragile-gemini-app --out patches/fragile
 gdoctor scan ./examples/upgraded-gemini-app --out reports/upgraded --html
 gdoctor rules
+gdoctor version
 gdoctor doctor
 gdoctor demo
 ```
@@ -151,6 +160,22 @@ Linters usually catch local code style or static errors. Interactions Doctor loo
 
 The core question is not "Is this line valid Python or TypeScript?" It is "Can this Gemini workflow survive tools, state, retries, evidence, and tests?"
 
+## Credibility And Limitations
+
+Interactions Doctor checks local source files and docs for common Gemini harness-readiness signals: ad hoc one-shot calls in stateful workflows, brittle manual state strings, vague or risky tool declarations, freeform JSON parsing, missing trace events, unsupported grounding claims, absent replay/smoke fixtures, and missing project-specific AI instructions.
+
+It does not execute the app, call Gemini, inspect private services, evaluate answer quality, verify business logic, or review security/privacy/legal posture. The generated patch files are starter artifacts for review, not automatic rewrites.
+
+False positives can happen when a repo uses names the scanner does not recognize, stores structured state in generated code, documents approval boundaries outside scanned files, or validates responses through framework conventions that are not visible statically.
+
+False negatives can happen when risky behavior is hidden behind wrappers, dynamic imports, metaprogramming, remote configuration, prompts stored outside the repo, or runtime-only tool definitions.
+
+Most findings are static heuristics. Replayable JSONL fixtures and smoke tests are generated as local starting points, but this tool does not run a live interaction replay by default.
+
+Production-grade use would need language-aware parsers, framework profiles, runtime traces, human review of side effects and data access, real regression suites, and organization-specific policy checks.
+
+This is not official Google tooling, is not affiliated with Google, uses only public/local artifacts, and does not guarantee safety, security, correctness, compliance, or production readiness.
+
 ## Patch Generation
 
 `gdoctor patch` writes starter files into the output directory and does not mutate the scanned app by default.
@@ -167,6 +192,7 @@ Generated files:
 - `prompts/external_content_boundary.md`
 - `tools/approval_boundary_example.json`
 - `MIGRATION_PLAN.md`
+- `README.patch-notes.md`
 
 These are safe starting points, not automatic rewrites.
 
@@ -223,10 +249,11 @@ In a three-tool suite:
 ```bash
 make test
 make demo
-make acceptance
+make reports
+make verify
 ```
 
-The acceptance flow runs tests, scans both examples, renders reports, generates patches, lists rules, and checks local installation health.
+The verification flow runs schema loading, tests, demo, report generation, patch generation, rules, version, and local installation health checks.
 
 ## Roadmap
 

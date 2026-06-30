@@ -9,7 +9,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from gdoctor import __version__
+from gdoctor import __schema_version__, __version__
 from gdoctor.patches import PATCH_TEMPLATE_NAMES, write_patch_files
 from gdoctor.reports import GENERATED_STARTER_FILES
 from gdoctor.scanner import scan_project
@@ -54,10 +54,14 @@ def print_summary(report, console: Console) -> None:
 
 def run_demo(console: Console) -> None:
     root = repo_root()
-    fragile = root / "examples" / "fragile-gemini-app"
-    upgraded = root / "examples" / "upgraded-gemini-app"
+    fragile_relative = Path("examples") / "fragile-gemini-app"
+    upgraded_relative = Path("examples") / "upgraded-gemini-app"
+    fragile = root / fragile_relative
+    upgraded = root / upgraded_relative
+    scan_fragile = fragile_relative if Path.cwd().resolve() == root.resolve() else fragile
+    scan_upgraded = upgraded_relative if Path.cwd().resolve() == root.resolve() else upgraded
 
-    fragile_report = scan_project(fragile)
+    fragile_report = scan_project(scan_fragile)
     print_summary(fragile_report, console)
     patch_dir = root / "patches" / "fragile-gemini-app"
     write_patch_files(fragile_report, patch_dir)
@@ -65,7 +69,7 @@ def run_demo(console: Console) -> None:
     console.print("Patch suggestions written:")
     console.print(f"  {patch_dir.relative_to(root).as_posix()}/")
 
-    upgraded_report = scan_project(upgraded)
+    upgraded_report = scan_project(scan_upgraded)
     console.print()
     console.print("[bold]Fixed example[/bold]")
     console.print(f"Target: {upgraded.relative_to(root).as_posix()}")
@@ -80,6 +84,7 @@ def run_doctor(console: Console) -> int:
     table.add_column("Result")
 
     table.add_row("gdoctor version", __version__)
+    table.add_row("schema version", __schema_version__)
     table.add_row("Python", sys.version.split()[0])
     for dependency in ["typer", "rich", "pydantic", "jinja2", "pytest"]:
         try:

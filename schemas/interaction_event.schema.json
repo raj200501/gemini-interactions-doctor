@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/gdoctor/interaction_event.schema.json",
+  "title": "Gemini Interaction Event",
+  "type": "object",
+  "required": ["event_id", "run_id", "event_type", "timestamp"],
+  "properties": {
+    "event_id": { "type": "string" },
+    "run_id": { "type": "string" },
+    "conversation_id": { "type": "string" },
+    "event_type": {
+      "type": "string",
+      "enum": ["message", "model_request", "model_response", "tool_call", "tool_result", "approval", "validation", "error"]
+    },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "role": { "type": "string", "enum": ["user", "assistant", "tool", "system"] },
+    "content": { "type": "string" },
+    "tool_call": {
+      "type": "object",
+      "properties": {
+        "tool_name": { "type": "string" },
+        "arguments": { "type": "object", "additionalProperties": true },
+        "approval_required": { "type": "boolean" },
+        "risk_level": { "type": "string", "enum": ["low", "medium", "high"] }
+      },
+      "additionalProperties": false
+    },
+    "tool_result": {
+      "type": "object",
+      "properties": {
+        "tool_name": { "type": "string" },
+        "status": { "type": "string", "enum": ["ok", "blocked", "failed"] },
+        "payload": { "type": "object", "additionalProperties": true }
+      },
+      "additionalProperties": false
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["kind", "label"],
+        "properties": {
+          "kind": { "type": "string" },
+          "label": { "type": "string" },
+          "uri": { "type": ["string", "null"] }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

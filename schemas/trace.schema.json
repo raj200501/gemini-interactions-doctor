@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/gdoctor/trace.schema.json",
+  "title": "Gemini Interaction Trace Event",
+  "type": "object",
+  "required": ["event_id", "run_id", "event_type", "timestamp", "target"],
+  "properties": {
+    "event_id": { "type": "string" },
+    "run_id": { "type": "string" },
+    "event_type": {
+      "type": "string",
+      "enum": ["model_request", "model_response", "tool_call", "approval", "validation", "error"]
+    },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "target": { "type": "string" },
+    "model": { "type": "string" },
+    "tool_name": { "type": "string" },
+    "approval_required": { "type": "boolean" },
+    "approved_by": { "type": "string" },
+    "schema_name": { "type": "string" },
+    "status": { "type": "string", "enum": ["started", "ok", "blocked", "failed"] },
+    "metadata": { "type": "object", "additionalProperties": true }
+  },
+  "additionalProperties": false
+}

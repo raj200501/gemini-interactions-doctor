@@ -39,6 +39,37 @@ def test_cli_rules():
     assert "GD018" in result.output
 
 
+def test_cli_version():
+    result = runner.invoke(app, ["version"])
+
+    assert result.exit_code == 0
+    assert "gdoctor 0.2.0" in result.output
+    assert "schema 0.2.0" in result.output
+
+
+def test_scan_strict_exit_codes(monkeypatch):
+    monkeypatch.chdir(ROOT)
+    fragile = ROOT / "examples" / "fragile-gemini-app"
+    upgraded = ROOT / "examples" / "upgraded-gemini-app"
+
+    fragile_result = runner.invoke(app, ["scan", fragile.as_posix(), "--strict", "--quiet"])
+    upgraded_result = runner.invoke(app, ["scan", upgraded.as_posix(), "--strict", "--quiet"])
+
+    assert fragile_result.exit_code == 1
+    assert upgraded_result.exit_code == 0
+    assert upgraded_result.output == ""
+
+
+def test_scan_verbose_prints_findings(monkeypatch):
+    monkeypatch.chdir(ROOT)
+    target = ROOT / "examples" / "fragile-gemini-app"
+    result = runner.invoke(app, ["scan", target.as_posix(), "--verbose"])
+
+    assert result.exit_code == 0
+    assert "Findings" in result.output
+    assert "GD013" in result.output
+
+
 def test_cli_scan_writes_markdown_and_html(tmp_path):
     target = ROOT / "examples" / "fragile-gemini-app"
     out = tmp_path / "fragile"

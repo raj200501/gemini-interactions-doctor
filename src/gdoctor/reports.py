@@ -18,6 +18,7 @@ GENERATED_STARTER_FILES = [
     "prompts/external_content_boundary.md",
     "tools/approval_boundary_example.json",
     "MIGRATION_PLAN.md",
+    "README.patch-notes.md",
 ]
 
 RECOMMENDED_MIGRATION_ORDER = [
@@ -517,7 +518,7 @@ def _render_issue_html(issue: Issue) -> str:
 
 
 def render_html(report: ScanReport) -> str:
-    return HTML_TEMPLATE.render(
+    rendered = HTML_TEMPLATE.render(
         report=report,
         target=_target_name(report),
         render_issue=_render_issue_html,
@@ -525,6 +526,7 @@ def render_html(report: ScanReport) -> str:
         migration_order=RECOMMENDED_MIGRATION_ORDER,
         top_blockers=top_migration_blockers(report),
     )
+    return "\n".join(line.rstrip() for line in rendered.splitlines()) + "\n"
 
 
 def render_plan(report: ScanReport) -> str:
@@ -580,5 +582,5 @@ This app is `{report.readiness}` with a score of `{report.score} / 100`.
 
 ## Reminder
 
-This plan is a local migration aid. It does not guarantee production readiness, security, privacy, or compliance.
+This plan is a local migration aid. It is not a production, security, privacy, legal, or compliance review.
 """

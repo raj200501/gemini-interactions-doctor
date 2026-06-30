@@ -1,0 +1,30 @@
+{
+  "name": "fragile",
+  "readiness": "NOT_READY",
+  "score": 0,
+  "rule_ids": [
+    "GD001",
+    "GD002",
+    "GD003",
+    "GD004",
+    "GD005",
+    "GD006",
+    "GD008",
+    "GD009",
+    "GD010",
+    "GD011",
+    "GD012",
+    "GD013",
+    "GD014",
+    "GD015",
+    "GD016",
+    "GD017",
+    "GD018"
+  ],
+  "severity_counts": {
+    "blocker": 9,
+    "warning": 8,
+    "note": 0
+  },
+  "absent_rule_ids": []
+}

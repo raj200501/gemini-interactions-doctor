@@ -6,7 +6,7 @@ from pathlib import Path
 from gdoctor.models import ScanReport
 from gdoctor.reports import GENERATED_STARTER_FILES, render_plan
 
-PATCH_TEMPLATE_NAMES = GENERATED_STARTER_FILES + ["README.patch-notes.md"]
+PATCH_TEMPLATE_NAMES = GENERATED_STARTER_FILES
 
 
 def patch_file_templates(report: ScanReport) -> dict[str, str]:

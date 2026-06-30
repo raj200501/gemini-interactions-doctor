@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.0 - Unreleased
+## 0.2.0 - 2026-06-30
 
 - Add interaction-specific rules for structured state, tool results, replayable scenarios, evidence objects, and machine-readable approvals.
 - Expand fragile and upgraded Gemini examples around support/research workflows.
@@ -8,6 +8,7 @@
 - Add `gdoctor rules`.
 - Improve HTML, Markdown, and migration plan report structure.
 - Add adversarial tests for simple one-shot apps, safe read-only tools, validated JSON parsing, prompt boundaries, and structured messages.
+- Add schema/version reporting, strict/quiet/verbose scan modes, deterministic verify flow, adversarial fixtures, golden reports, and scanner robustness coverage.
 
 ## 0.1.0
 

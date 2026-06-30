@@ -197,9 +197,9 @@
       </div>
       <div class="panel">
         <h2>Top Migration Blockers</h2>
-        
+
         <p>No blocker findings.</p>
-        
+
       </div>
     </div>
   </header>
@@ -207,8 +207,8 @@
     <section>
       <h2>Summary</h2>
       <div class="panel">
-        <p><strong>Target:</strong> <code>/Users/rajkashikar/Documents/Codex/2026-06-26/you-are-codex-working-inside-a/gemini-interactions-doctor/examples/upgraded-gemini-app</code></p>
-        <p><strong>Scan time:</strong> <code>2026-06-27T04:32:29+00:00</code></p>
+        <p><strong>Target:</strong> <code>examples/upgraded-gemini-app</code></p>
+        <p><strong>Scan time:</strong> <code>2026-06-30T00:00:00+00:00</code></p>
       </div>
     </section>
 
@@ -222,61 +222,63 @@
 
     <section>
       <h2>Migration Blockers</h2>
-      
+
       <p>No blocker findings.</p>
-      
+
     </section>
 
     <section>
       <h2>Warnings</h2>
       <div class="issue-list">
-        
+
         <div class="panel">No warning findings.</div>
-        
+
       </div>
     </section>
 
     <section>
       <h2>Evidence Snippets</h2>
       <div class="issue-list">
-        
+
         <div class="panel">No blocker or note evidence.</div>
-        
+
       </div>
     </section>
 
     <section class="cols">
       <div class="panel">
         <h2>Patch Suggestions</h2>
-        
+
         <p>No starter patch files recommended.</p>
-        
+
       </div>
       <div class="panel">
         <h2>Generated Files</h2>
-        <p>Run <code>gdoctor patch /Users/rajkashikar/Documents/Codex/2026-06-26/you-are-codex-working-inside-a/gemini-interactions-doctor/examples/upgraded-gemini-app --out patches/upgraded-gemini-app</code> to write safe starter files.</p>
+        <p>Run <code>gdoctor patch examples/upgraded-gemini-app --out patches/upgraded-gemini-app</code> to write safe starter files.</p>
         <ul>
-          
+
           <li><code>.env.example</code></li>
-          
+
           <li><code>AGENTS.md</code></li>
-          
+
           <li><code>tests/test_ai_smoke.py</code></li>
-          
+
           <li><code>observability/interaction_event_schema.json</code></li>
-          
+
           <li><code>observability/trace_schema.json</code></li>
-          
+
           <li><code>evals/sample_interaction_regression.jsonl</code></li>
-          
+
           <li><code>prompts/structured_output_prompt.md</code></li>
-          
+
           <li><code>prompts/external_content_boundary.md</code></li>
-          
+
           <li><code>tools/approval_boundary_example.json</code></li>
-          
+
           <li><code>MIGRATION_PLAN.md</code></li>
-          
+
+          <li><code>README.patch-notes.md</code></li>
+
         </ul>
       </div>
     </section>
@@ -285,33 +287,33 @@
       <div class="panel">
         <h2>Next Steps</h2>
         <ul>
-          
+
           <li>Keep the smoke test close to the primary Gemini path.</li>
-          
+
           <li>Review tool approvals whenever you add side-effecting capabilities.</li>
-          
+
           <li>Keep structured output contracts and trace events versioned with the app.</li>
-          
+
         </ul>
       </div>
       <div class="panel">
         <h2>Recommended Migration Order</h2>
         <ol>
-          
+
           <li>Move from brittle string prompts to structured messages/events.</li>
-          
+
           <li>Make tool calls and tool results first-class objects.</li>
-          
+
           <li>Add machine-readable approval boundaries for side-effecting tools.</li>
-          
+
           <li>Add structured output validation.</li>
-          
+
           <li>Add trace events and run IDs.</li>
-          
+
           <li>Add one replayable smoke/regression test.</li>
-          
+
           <li>Tighten grounding/evidence claims.</li>
-          
+
         </ol>
       </div>
     </section>
@@ -320,21 +322,21 @@
       <div class="panel">
         <h2>What This Does Not Guarantee</h2>
         <ul>
-          
+
           <li>It is not official Google tooling and is not affiliated with Google.</li>
-          
+
           <li>It does not know private AI Studio or Gemini roadmap details.</li>
-          
-          <li>It does not prove production readiness.</li>
-          
+
+          <li>It is not a production readiness assessment.</li>
+
           <li>It does not execute or call Gemini APIs.</li>
-          
-          <li>It does not verify security, privacy, legal, or compliance posture.</li>
-          
+
+          <li>It does not replace security, privacy, legal, or compliance review.</li>
+
           <li>It uses static heuristics and safe patch templates.</li>
-          
-          <li>It does not guarantee that suggested patches are sufficient for your app architecture.</li>
-          
+
+          <li>Suggested patches still need project-specific review.</li>
+
         </ul>
       </div>
     </section>

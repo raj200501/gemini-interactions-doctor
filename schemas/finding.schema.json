@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/gdoctor/finding.schema.json",
+  "title": "Gemini Interactions Doctor Finding",
+  "type": "object",
+  "required": [
+    "rule_id",
+    "title",
+    "severity",
+    "category",
+    "file",
+    "line_start",
+    "line_end",
+    "evidence_snippet",
+    "why_it_matters",
+    "gemini_relevance",
+    "migration_advice",
+    "safe_patch_available",
+    "confidence"
+  ],
+  "properties": {
+    "rule_id": { "type": "string", "pattern": "^GD[0-9]{3}$" },
+    "title": { "type": "string" },
+    "severity": { "type": "string", "enum": ["blocker", "warning", "note"] },
+    "category": { "type": "string" },
+    "file": { "type": "string" },
+    "line_start": { "type": "integer", "minimum": 1 },
+    "line_end": { "type": "integer", "minimum": 1 },
+    "evidence_snippet": { "type": "string" },
+    "why_it_matters": { "type": "string" },
+    "gemini_relevance": { "type": "string" },
+    "migration_advice": { "type": "string" },
+    "safe_patch_available": { "type": "boolean" },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+  },
+  "additionalProperties": false
+}

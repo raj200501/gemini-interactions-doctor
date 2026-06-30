@@ -42,6 +42,22 @@ def test_patch_generation_writes_safe_starter_files(tmp_path):
     assert "prompts/external_content_boundary.md" in relative
     assert "tools/approval_boundary_example.json" in relative
     assert "MIGRATION_PLAN.md" in relative
+    assert "README.patch-notes.md" in relative
 
     trace_schema = json.loads((tmp_path / "patches" / "observability" / "trace_schema.json").read_text())
     assert trace_schema["title"] == "Gemini interaction trace event"
+
+
+def test_patch_generation_is_deterministic(tmp_path):
+    report = scan_project(ROOT / "examples" / "fragile-gemini-app")
+    first_dir = tmp_path / "first"
+    second_dir = tmp_path / "second"
+
+    first = write_patch_files(report, first_dir)
+    second = write_patch_files(report, second_dir)
+
+    first_map = {path.relative_to(first_dir).as_posix(): path.read_text(encoding="utf-8") for path in first}
+    second_map = {path.relative_to(second_dir).as_posix(): path.read_text(encoding="utf-8") for path in second}
+
+    assert first_map == second_map
+    assert "current readiness" in first_map["MIGRATION_PLAN.md"].lower()

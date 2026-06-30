@@ -2,6 +2,8 @@
 
 This sample demonstrates a safer local harness for a Gemini workflow:
 
+Expected `gdoctor` result: `READY` or `READY_WITH_CAUTION`.
+
 - structured interaction events
 - message/event list with run IDs
 - tool call objects

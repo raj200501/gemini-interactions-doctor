@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/gdoctor/report.schema.json",
+  "title": "Gemini Interactions Doctor Report",
+  "type": "object",
+  "required": [
+    "target_path",
+    "scan_time",
+    "readiness",
+    "score",
+    "issues",
+    "migration_blockers",
+    "suggested_patch_files",
+    "next_steps",
+    "what_the_tool_does_not_guarantee"
+  ],
+  "properties": {
+    "target_path": { "type": "string" },
+    "scan_time": { "type": "string" },
+    "readiness": { "type": "string", "enum": ["READY", "READY_WITH_CAUTION", "NOT_READY"] },
+    "score": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "issues": {
+      "type": "array",
+      "items": { "$ref": "finding.schema.json" }
+    },
+    "migration_blockers": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "suggested_patch_files": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "next_steps": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "what_the_tool_does_not_guarantee": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "additionalProperties": false
+}

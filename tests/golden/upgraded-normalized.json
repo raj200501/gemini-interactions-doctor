@@ -1,0 +1,18 @@
+{
+  "name": "upgraded",
+  "readiness": "READY",
+  "score": 100,
+  "rule_ids": [],
+  "severity_counts": {
+    "blocker": 0,
+    "warning": 0,
+    "note": 0
+  },
+  "absent_rule_ids": [
+    "GD013",
+    "GD014",
+    "GD015",
+    "GD017",
+    "GD018"
+  ]
+}

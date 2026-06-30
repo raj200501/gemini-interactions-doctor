@@ -2,8 +2,8 @@
 
 Readiness report for `fragile-gemini-app`
 
-- Target: `/Users/rajkashikar/Documents/Codex/2026-06-26/you-are-codex-working-inside-a/gemini-interactions-doctor/examples/fragile-gemini-app`
-- Scan time: `2026-06-27T04:31:54+00:00`
+- Target: `examples/fragile-gemini-app`
+- Scan time: `2026-06-30T00:00:00+00:00`
 - Readiness: `NOT_READY`
 - Score: `0 / 100`
 
@@ -64,6 +64,7 @@ Readiness is `NOT_READY` when any blocker exists or score is below `70`, `READY_
 - `prompts/external_content_boundary.md`
 - `tools/approval_boundary_example.json`
 - `MIGRATION_PLAN.md`
+- `README.patch-notes.md`
 
 ## Recommended Migration Order
 
@@ -290,7 +291,7 @@ Readiness is `NOT_READY` when any blocker exists or score is below `70`, `READY_
 Run:
 
 ```bash
-gdoctor patch /Users/rajkashikar/Documents/Codex/2026-06-26/you-are-codex-working-inside-a/gemini-interactions-doctor/examples/fragile-gemini-app --out patches/fragile-gemini-app
+gdoctor patch examples/fragile-gemini-app --out patches/fragile-gemini-app
 ```
 
 ## Next Steps
@@ -309,8 +310,8 @@ gdoctor patch /Users/rajkashikar/Documents/Codex/2026-06-26/you-are-codex-workin
 
 - It is not official Google tooling and is not affiliated with Google.
 - It does not know private AI Studio or Gemini roadmap details.
-- It does not prove production readiness.
+- It is not a production readiness assessment.
 - It does not execute or call Gemini APIs.
-- It does not verify security, privacy, legal, or compliance posture.
+- It does not replace security, privacy, legal, or compliance review.
 - It uses static heuristics and safe patch templates.
-- It does not guarantee that suggested patches are sufficient for your app architecture.
+- Suggested patches still need project-specific review.

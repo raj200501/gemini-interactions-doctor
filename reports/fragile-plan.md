@@ -1,6 +1,6 @@
 # Gemini Interaction Migration Plan
 
-Target: `/Users/rajkashikar/Documents/Codex/2026-06-26/you-are-codex-working-inside-a/gemini-interactions-doctor/examples/fragile-gemini-app`
+Target: `examples/fragile-gemini-app`
 Readiness: `NOT_READY`
 Score: `0 / 100`
 
@@ -45,6 +45,7 @@ This app is `NOT_READY` with a score of `0 / 100`.
 - `prompts/external_content_boundary.md`
 - `tools/approval_boundary_example.json`
 - `MIGRATION_PLAN.md`
+- `README.patch-notes.md`
 
 ## Recommended Migration Order
 
@@ -86,4 +87,4 @@ This app is `NOT_READY` with a score of `0 / 100`.
 
 ## Reminder
 
-This plan is a local migration aid. It does not guarantee production readiness, security, privacy, or compliance.
+This plan is a local migration aid. It is not a production, security, privacy, legal, or compliance review.
