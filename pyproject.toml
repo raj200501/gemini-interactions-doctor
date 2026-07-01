@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "gemini-interactions-doctor"
 version = "0.2.0"
-description = "A local readiness checker for Gemini apps moving toward stateful, tool-using workflows."
+description = "Readiness checker for Gemini app harnesses: state, tools, traces, tests, and migration patches."
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [{ name = "Raj Kashikar" }]
