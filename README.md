@@ -216,7 +216,7 @@ It does not require internal APIs. It does not know private AI Studio roadmap de
 
 - **ShipCheck** asks: "Should I share or deploy this Gemini app yet?"
 - **Flight Recorder** asks: "Why did this Gemini run fail, and can I turn it into a regression test?"
-- **Interactions Doctor** asks: "Is this Gemini app harness wired for state, tools, tests, and iteration?"
+- **Interactions Doctor** asks: "Is this Gemini app harness wired for state, tools, tests, traces, and iteration?"
 
 In a three-tool suite:
 
